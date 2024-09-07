@@ -49,7 +49,7 @@ async function forwardRequest(req, res) {
         ...req.headers, // Tambahkan header dari request client
       },
       data: req.method !== 'GET' && req.body ? req.body : undefined, // Hanya tambahkan body untuk POST/PUT
-      httpsAgent, // Tambahkan httpsAgent untuk SSL
+      // httpsAgent, // Tambahkan httpsAgent untuk SSL
     };
 
     // Kirim request ke API Tomarket menggunakan axios
