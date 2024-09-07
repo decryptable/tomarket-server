@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 const clear = require('console-clear');
 const cors = require('cors');
 const express = require('express');
