@@ -2,7 +2,7 @@ const clear = require('console-clear');
 const cors = require('cors');
 const express = require('express');
 const https = require('https');
-// const fetch = require('node-fetch');
+const axios = require('axios');
 const app = express();
 const PORT = 3000;
 const BASE_URL = 'https://api-web.tomarket.ai/tomarket-game/v1/';
@@ -31,50 +31,51 @@ async function forwardRequest(req, res) {
   delete req.headers.origin;
   const path = req.originalUrl.replace('/api/', ''); // Ambil path setelah /api/
   const url = `${BASE_URL}${path}`;
+
+  // log semua method, headers, query string, serta body (optional)
+  console.log(`[${req.method}] ${url}`);
+  console.log(`Headers: ${JSON.stringify(req.headers)}`);
+  console.log(`Query String: ${req.querystring}`);
+  console.log(`Body: ${JSON.stringify(req.body)}`);
+  console.log('-------------------------------');
+
   try {
-    // Siapkan options untuk fetch
+    // Siapkan options untuk axios
     const options = {
       method: req.method,
+      url, // URL yang dikirim ke Axios
       headers: {
         'Content-Type': 'application/json',
         ...req.headers, // Tambahkan header dari request client
       },
-
-      body:
-        req.method !== 'GET' && req.body ? JSON.stringify(req.body) : undefined,
-      agent: httpsAgent, // Penggunaan agent HTTPS agar SSL diaktifkan
+      data: req.method !== 'GET' && req.body ? req.body : undefined, // Hanya tambahkan body untuk POST/PUT
+      httpsAgent, // Tambahkan httpsAgent untuk SSL
     };
 
-    // Kirim request ke API Tomarket
-    const response = await fetch(url, options);
-    const responseText = await response.text();
-    const data = JSON.parse(responseText);
+    // Kirim request ke API Tomarket menggunakan axios
+    const response = await axios(options);
 
-    // Jika respons sukses, kirim kembali ke client
-    if (response.ok) {
-      res.status(response.status).json(data);
-    } else {
-      res.status(response.status).json({
-        error: true,
-        status: response.status,
-        message: response.statusText,
-        data,
-      });
-    }
+    // log response text
+    console.log('Response:\n' + JSON.stringify(response.data));
+    console.log('-------------------------------');
+
+    // Kirimkan response kembali ke client
+    res.status(response.status).json(response.data);
   } catch (error) {
+    console.error(error);
+
     // Tangani error ketika forward request
     if (isDevelopment) {
-      // Tampilkan error lengkap dalam mode development
       res.status(500).json({
         error: true,
-        status: 401,
+        status: 999,
         message: error.message,
+        data: error.response ? error.response.data : null, // Tambahkan data error jika ada
       });
     } else {
-      // Tampilkan pesan generik jika bukan mode development
       res.status(500).json({
         error: true,
-        status: 401,
+        status: 999,
         message: 'Failed connecting to Tomarket server',
       });
     }
