@@ -6,7 +6,7 @@ const express = require('express');
 const https = require('https');
 const axios = require('axios');
 const app = express();
-const PORT = 3000;
+const port = process.env.PORT || 3000;
 const BASE_URL = 'https://api-web.tomarket.ai/tomarket-game/v1/';
 const isDevelopment = process.env.NODE_ENV === 'development';
 const httpsAgent = new https.Agent({
@@ -88,8 +88,8 @@ async function forwardRequest(req, res) {
 app.all('/api/*', forwardRequest);
 
 // Jalankan server
-app.listen(PORT, () => {
+app.listen(port, () => {
   clear();
-  console.log(`Server is running on http://localhost:${PORT}`);
+  console.log(`Server is running on http://localhost:${port}`);
 });
-module.exports = app;
+// module.exports = app;
